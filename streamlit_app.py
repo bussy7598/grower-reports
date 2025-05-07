@@ -35,9 +35,11 @@ if st.button("Generate & Send Reports"):
 
     email_map = {}
     for line in email_input.splitlines():
-        if "<" in line and ">" in line:
-            name, addr = line.split("<",1)
-            email_map[name.strip()] = addr.strip(" >\n")
+        parts = line.strip().split()
+        if len(parts) >=2:
+            name = " ".join(parts[:-1])
+            addr = parts[-1]
+            email_map[name] = addr
     if not email_map:
         st.error("Please enter at least one grower and email.")
         st.stop()
