@@ -23,7 +23,7 @@ start_date, end_date = st.date_input(
 st.markdown(
     "Enter grower names and emails, one per line in the format:\n\n"
     "'Grower Name <email@example.com>'\n"
-    "e.g. 'Marvelus Berries <marvelus@berryco.com>'"
+    "e.g. 'John Smith <JohnSmith@berryco.com>'"
     )
 
 email_input = st.text_area("Grower Email Map", height=150)
