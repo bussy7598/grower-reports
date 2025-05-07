@@ -1,0 +1,135 @@
+import os
+import pandas as pd
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from openpyxl import load_workbook
+from openpyxl.styles import Alignment
+from openpyxl.utils.dataframe import dataframe_to_rows
+import smtplib
+from email.message import EmailMessage
+
+def filter_master(path):
+    df = pd.read_excel(path, header=1).dropna(how="all")
+    df['Packed Date'] = pd.to_datetime(df['Packed Date'], dayfirst=True)
+    today = datetime.today()
+    one_month_ago = today - relativedelta(months=1)
+    return df[(df['Packed Date'] >= one_month_ago) & (df['Packed Date'] <= today)].copy()
+
+def generate_reports(df, template_path, output_dir, growers=None):
+  
+    os.makedirs(output_dir, exist_ok=True)
+    paths = []
+
+    expected_cols = [
+    "Year Packed", "Packed Date", "Pack Week", "Crop", "Supplier",
+    "TBC Ref. (Po No)", "Consignee", "Delivery Date", "Product", "Trays",
+    "Net Weight", "Tray Price", "Total", "Grower Con Note (Or Load)",
+    "Repacked", "Wasted", "Reconsigned", "MBM Kg Rate", "MBM Kg Charge ($)",
+    "Commission %", "Commission Charge ($)", "Levy Charge ($) (ex Gst)",
+    "Supermarket Charge %", "Supermarket Charge $","Estimated Interstate $/Tray",
+    "Estimated Interstate Charge ($)","Estimated Fumigation $/Tray","Estimated Fumigation Charge ($)",
+    "Return To Farm Total ($)","Net Return To Farm (Per Kg)"
+    
+    ]
+    
+    STYLE_MAP = {
+    "A": {"number_format": None,          "alignment": "center", "fill": None},
+    "B": {"number_format": "DD/MM/YYYY",  "alignment": "right",  "fill": None},
+    "C": {"number_format": "0",           "alignment": "center", "fill": None},
+    "D": {"number_format": None,          "alignment": "left",   "fill": None},
+    "E": {"number_format": None,          "alignment": "left",   "fill": None},
+    "F": {"number_format": None,          "alignment": "left",   "fill": None},
+    "G": {"number_format": None,          "alignment": "left",   "fill": None},
+    "H": {"number_format": "DD/MM/YYYY",  "alignment": "right",  "fill": None},
+    "I": {"number_format": None,          "alignment": "left",   "fill": None},
+    "J": {"number_format": "0",           "alignment": "right",  "fill": None},
+    "K": {"number_format": "0.00",        "alignment": "right",  "fill": None},
+    "L": {"number_format": "$#,##0.00",   "alignment": "right",  "fill": None},
+    "M": {"number_format": "$#,##0.00",   "alignment": "right",  "fill": None},
+    "N": {"number_format": None,          "alignment": "left",   "fill": None},
+    "O": {"number_format": "0",           "alignment": "right",  "fill": None},
+    "P": {"number_format": "0",           "alignment": "right",  "fill": None},
+    "Q": {"number_format": "0",           "alignment": "right",  "fill": None},
+    "R": {"number_format": "$#,##0.00",   "alignment": "right",  "fill": None},
+    "S": {"number_format": "$#,##0.00",   "alignment": "right",  "fill": None},
+    "T": {"number_format": "0.00",       "alignment": "right",  "fill": None},
+    "U": {"number_format": "$#,##0.00",   "alignment": "right",  "fill": None},
+    "V": {"number_format": "$#,##0.00",   "alignment": "right",  "fill": None},
+    "W": {"number_format": "0.00",       "alignment": "right",  "fill": None},
+    "X": {"number_format": "$#,##0.00",   "alignment": "right",  "fill": None},
+    "Y": {"number_format": "$#,##0.00",   "alignment": "right",  "fill": None},
+    "Z": {"number_format": "$#,##0.00",   "alignment": "right",  "fill": None},
+    "AA":{"number_format": "$#,##0.00",   "alignment": "right",  "fill": None},
+    "AB":{"number_format": "$#,##0.00",   "alignment": "right",  "fill": None},
+    "AC":{"number_format": "$#,##0.00",   "alignment": "right",  "fill": None},
+    "AD":{"number_format": "$#,##0.00",   "alignment": "right",  "fill": None},
+    }
+
+    alignments = {col: Alignment(horizontal=spec["alignment"])
+              for col, spec in STYLE_MAP.items()}
+
+    SHEET_INDEX = 0
+    START_ROW = 18
+    PLACEHOLDERS = 2
+
+    for grower, in df.groupby('GrowerName'):
+         if growers and grower not in growers:
+            continue
+
+    group = group.reindex(columns=expected_cols, fill_value="")
+
+    wb= load_workbook(template_path)
+    ws = wb.worksheets[SHEET_INDEX]
+    ws.delete_rows(START_ROW, PLACEHOLDERS)
+
+    for r_off, row in enumerate(dataframe_to_rows(group, False, False)):
+        row_idx = START_ROW + r_off
+        for c_off, val in enumerate(row,1):
+            cell = ws.cell(row=row_idx, column=c_off, value=val)
+            col = cell.column_letter
+            nf = STYLE_MAP[col]["number_format"]
+            if nf: cell.number_format = nf
+            cell.alignment = alignments[col]
+
+    out_path = os.path.join(output_dir, f"{grower} - TBC Grower Reports.xlsx")
+    wb.save(out_path)
+    paths.append(out_path)
+
+    return paths
+
+def send_reports(report_paths, email_map, smtp_cfg):
+
+    today_str = datetime.today().strftime("%d.%m.%Y")
+    with smtplib.SMTP(smtp_cfg["host"], smtp_cfg["port"]) as server:
+        server.starttls()
+        server.login(smtp_cfg["user"], smtp_cfg["password"])
+
+        for path in report_paths:
+            grower = os.path.basename(path).split(" - ")[0]
+            to_addr = email_map.get(grower)
+            if not to_addr:
+                print(f"No email for {grower}, skipping.")
+                continue
+
+            msg = EmailMessage()
+            msg["Subject"] =f"{grower} - TBC Grower Report {today_str}"
+            msg["From"] = smtp_cfg["from_adress"]
+            msg["To"] = to_addr
+            msg.set_content(
+                f"Hi {grower}, \n\n"
+                "Please find attached your Return to Grower Report. \n"
+                "Let us know if you have any questions. \n\n"
+                "Regards, \n"
+                "The Marketing Team"
+            )
+
+            with open(path, "rb") as f:
+                data = f.read()
+            msg.add_attachment(
+                data,
+                maintyp ="application",
+                subtype="vnd.openxlmformats-officedocument.spreedsheetml.sheet",
+                filename=os.path.basename(path)
+            )
+            server.send_message(msg)
+            print(f"Sent report to {grower} at {to_addr}")
