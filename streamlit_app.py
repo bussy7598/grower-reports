@@ -5,7 +5,6 @@ import zipfile
 import streamlit as st
 import  pandas as pd
 
-st.write("Available secrets keys:", list(st.secrets.keys()))
 
 from reports_core import filter_master, generate_reports, send_reports
 
