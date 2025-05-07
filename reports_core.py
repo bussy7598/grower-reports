@@ -24,6 +24,7 @@ def filter_master(path, start_date, end_date):
         .str[0]
         .str.strip()
     )
+    return df
 
 def generate_reports(df, template_path, output_dir, growers=None):
   
