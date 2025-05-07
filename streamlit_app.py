@@ -9,7 +9,7 @@ from reports_core import filter_master, generate_reports, send_reports
 
 st.set_page_config(page_title="Grower Reports", layout="wide")
 
-st.title("TBC Grower Report Generator")
+st.title("Grower Report Generator")
 
 master_file = st.file_uploader("Upload your Return to Grower Report.xlsx", type="xlsx")
 
