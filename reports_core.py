@@ -8,7 +8,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 import smtplib
 from email.message import EmailMessage
 
-def filter_master(path):
+def filter_master(path, start_date, end_date):
     df = pd.read_excel(path, header=1).dropna(how="all")
     df['Packed Date'] = pd.to_datetime(df['Packed Date'], dayfirst=True)
     today = datetime.today()
