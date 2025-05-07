@@ -63,6 +63,9 @@ if st.button("Generate & Send Reports"):
         "password": st.secrets["smtp_password"],
         "from_address": "marketing@theberrycollective.com.au"
     }
+
+    st.write("SMTP password loaded?", bool(smtp_cfg["password"]))
+
     with st.spinner("Sending emails..."):
         send_reports(paths, email_map, smtp_cfg)
 
