@@ -58,7 +58,7 @@ if st.button("Generate & Send Reports"):
                              growers=list(email_map.keys()))
     
     smtp_cfg = {
-        "host":"smtp.yourdomain.com",
+        "host":"smtp.office365.com",
         "port": 587,
         "user": "sbuss@theberrycollective.com.au",
         "password": st.secrets["smtp_password"],
