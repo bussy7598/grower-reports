@@ -52,7 +52,7 @@ if st.button("Generate & Send Reports"):
 
     out_dir = "temp_reports"
     paths = generate_reports(df,
-                             template_path=r"C:\Users\bussy\OneDrive - The Berry Collective\General - Sales Team\Grower Reports\Completed\TBC_Grower_Report_Template.xlsx",
+                             template_path="TBC_Grower_Report_Template.xlsx",
                              output_dir=out_dir,
                              growers=list(email_map.keys()))
     
