@@ -5,6 +5,8 @@ import zipfile
 import streamlit as st
 import  pandas as pd
 
+st.write("Available secrets keys:", list(st.secrets.keys()))
+
 from reports_core import filter_master, generate_reports, send_reports
 
 st.set_page_config(page_title="Grower Reports", layout="wide")
@@ -64,7 +66,6 @@ if st.button("Generate & Send Reports"):
         "from_address": "marketing@theberrycollective.com.au"
     }
 
-    st.write("SMTP password loaded?", bool(smtp_cfg["password"]))
 
     with st.spinner("Sending emails..."):
         send_reports(paths, email_map, smtp_cfg)
