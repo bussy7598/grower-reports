@@ -14,7 +14,8 @@ def filter_master(path, start_date, end_date):
     
     mask = (df['Packed Date'] >= pd.to_datetime(start_date)) & \
         (df["Packed Date"] <= pd.to_datetime(end_date))\
-        df = df.loc[mask].copy()
+        
+    df = df.loc[mask].copy()
 
     df['GrowerName'] = (
         df['Supplier']
