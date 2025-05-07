@@ -14,7 +14,7 @@ def filter_master(path, start_date, end_date):
     
     mask = (df['Packed Date'] >= pd.to_datetime(start_date)) & \
         (df["Packed Date"] <= pd.to_datetime(end_date))\
-    df = df.loc[mask].copy()
+        df = df.loc[mask].copy()
 
     df['GrowerName'] = (
         df['Supplier']
@@ -23,7 +23,7 @@ def filter_master(path, start_date, end_date):
         .str[0]
         .str.strip()
     )
-    
+
 def generate_reports(df, template_path, output_dir, growers=None):
   
     os.makedirs(output_dir, exist_ok=True)
