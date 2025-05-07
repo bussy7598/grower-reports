@@ -11,10 +11,19 @@ from email.message import EmailMessage
 def filter_master(path, start_date, end_date):
     df = pd.read_excel(path, header=1).dropna(how="all")
     df['Packed Date'] = pd.to_datetime(df['Packed Date'], dayfirst=True)
-    today = datetime.today()
-    one_month_ago = today - relativedelta(months=1)
-    return df[(df['Packed Date'] >= one_month_ago) & (df['Packed Date'] <= today)].copy()
+    
+    mask = (df['Packed Date'] >= pd.to_datetime(start_date)) & \
+        (df["Packed Date"] <= pd.to_datetime(end_date))\
+    df = df.loc[mask].copy()
 
+    df['GrowerName'] = (
+        df['Supplier']
+        .astype(str)
+        .str.split("(", n=1)
+        .str[0]
+        .str.strip()
+    )
+    
 def generate_reports(df, template_path, output_dir, growers=None):
   
     os.makedirs(output_dir, exist_ok=True)
