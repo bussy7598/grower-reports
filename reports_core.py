@@ -83,7 +83,7 @@ def generate_reports(df, template_path, output_dir, growers=None):
     START_ROW = 18
     PLACEHOLDERS = 2
 
-    for grower, in df.groupby('GrowerName'):
+    for grower, group in df.groupby('GrowerName'):
          if growers and grower not in growers:
             continue
 
