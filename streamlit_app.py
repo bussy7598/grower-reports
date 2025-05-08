@@ -19,41 +19,55 @@ if not master_file:
     st.stop()
 
 
-#2. Pick Date Range
-today = pd.Timestamp("today").normalize()
-one_month_ago = today - pd.DateOffset(months=1)
-start_date, end_date = st.date_input(
-    "Select date range for Packed Date",
-    value=(one_month_ago, today)
-    )
-
-#3. Read and List Growers
-with st.spinner("Loading and filtering file..."):
+#2. Read and List Growers
+with st.spinner("Loading file..."):
     tmp_master = "temp_master.xlsx"
     with open(tmp_master, "wb") as f:
         f.write(master_file.read())
-    df_master = filter_master(tmp_master, start_date, end_date)
+    df_master = pd.read_excel(tmp_master, header=1).dropna(how="all")
+    df_master['Packed Date'] = pd.to_datetime(df_master['Packed Date'], dayfirst=True)
+    df_master['GrowerName'] = (
+        df_master['Supplier'].astype(str)
+        .str.split("(", 1).str[0].str.strip()
+    )
 
-all_growers = sorted(df_master['GrowerName'].unique())
-selected = st.multiselect(
-    "Select growers to generate a report for",
-    options=all_growers,
-    default=all_growers
-)
-if not selected:
-    st.warning("Please select at least one grower.")
-    st.stop()
+#3 Loading grower settings
+settings_df = pd.read_excel("grower_settings.xlsx", sheet_name="Filters")
+st.markdown("### Grower-specific Filter Settings")
+st.dataframe(settings_df, use_container_width=True)
+
 
 #4. Generate & Download
 if st.button("Generate Reports"):
     out_dir = "temp_reports"
-    paths = generate_reports(
-        df_master,
-        template_path= "TBC_Grower_Report_Template.xlsx",
-        output_dir=out_dir,
-        growers=selected
-    )
+    os.makedirs(out_dir,exist_ok=True)
 
+    report_path = []
+    today = pd.Timestamp("today").normalize().date()
+
+    for _, row in settings_df.iterrows():
+        grower = row["GrowerName"]
+
+        if row["FilterType"] == "Past month":
+            start = today - pd.DateOffset(months=1)
+            end = today
+        else:
+            start = pd.to_datetime(row["CustomStart"]).date()
+            end = today
+
+        subset = df_master[
+            (df_master["GrowerName"] == grower) &
+            (df_master["Packed Date"].dt.date.between(start, end))
+        ]
+
+        paths = generate_reports(
+            subset,
+            template_path="TBC_Grower_Report_Template.xlsx",
+            output_dir=out_dir,
+            growers=[grower]
+        )
+        report_path.extend(paths)
+        
     #bundle into ZIP
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w") as zf:
