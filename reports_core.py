@@ -27,6 +27,8 @@ def filter_master(path, start_date, end_date):
     return df
 
 def generate_reports(df, template_path, output_dir, growers=None):
+    if df is None or df.empty:
+        return []
   
     os.makedirs(output_dir, exist_ok=True)
     paths = []
