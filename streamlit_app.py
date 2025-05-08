@@ -39,16 +39,6 @@ with st.spinner("Loading file..."):
         .str.strip()
     )
 
-today = datetime.date.today()
-start_30 = today - datetime.timedelta(days=30)
-filtered_all = df_master[
-    (df_master['Packed Date'] >= pd.Timestamp(start_30)) &
-    (df_master['Packed Date'] < pd.Timestamp(today) + pd.Timedelta(days=1))
-]
-st.write("### Global 30-day filter test")
-st.write(f"Rows before filter: {len(df_master)}")
-st.write(f"Rows after filter: {len(filtered_all)}")
-
 #3 Loading grower settings
 settings_df = pd.read_excel("grower_settings.xlsx", sheet_name="Filters")
 st.markdown("### Grower-specific Filter Settings")
