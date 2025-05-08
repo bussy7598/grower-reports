@@ -2,6 +2,7 @@ import os
 import io
 import zipfile
 import datetime
+
 import streamlit as st
 import  pandas as pd
 
@@ -24,6 +25,7 @@ with st.spinner("Loading file..."):
     tmp_master = "temp_master.xlsx"
     with open(tmp_master, "wb") as f:
         f.write(master_file.read())
+
     df_master = pd.read_excel(tmp_master, header=1).dropna(how="all")
     df_master['Packed Date'] = pd.to_datetime(
         df_master['Packed Date'],
@@ -59,6 +61,16 @@ counts = (
 )
 st.write("Rows per grower (unfiltered):")
 st.dataframe(counts, use_container_width=True)
+
+today = datetime.date.today()
+start_30 = today - datetime.timedelta(days=30)
+filtered_all = df_master[
+    (df_master['Packed Date'] >= pd.Timestamp(start_30)) &
+    (df_master['Packed Date'] < pd.Timestamp(today) + pd.Timedelta(days=1))
+]
+st.write("### Global 30-day filter test")
+st.write(f"Rows before filter: {len(df_master)}")
+st.write(f"Rows after filter: {len(filtered_all)}")
 
 marv= df_master[df_master["GrowerName"] == "Marvelus Berries"]
 st.write("Marvelus Berries rows (unfiltered):")
