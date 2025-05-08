@@ -60,6 +60,10 @@ counts = (
 st.write("Rows per grower (unfiltered):")
 st.dataframe(counts, use_container_width=True)
 
+marv= df_master[df_master["GrowerName"] == "Marvelus Berries"]
+st.write("Marvelus Berries rows (unfiltered):")
+st.dataframe(marv[["Packed Date"]].sort_values("Packed Date"),use_container_width=True)
+
 #3 Loading grower settings
 settings_df = pd.read_excel("grower_settings.xlsx", sheet_name="Filters")
 st.markdown("### Grower-specific Filter Settings")
