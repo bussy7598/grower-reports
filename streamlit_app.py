@@ -76,7 +76,7 @@ if st.button("Generate Reports"):
     os.makedirs(out_dir,exist_ok=True)
 
     report_path = []
-    today = datetime.date.today
+    today = datetime.date.today()
 
     for _, row in settings_df.iterrows():
         grower = row["GrowerName"]
