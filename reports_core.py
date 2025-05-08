@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from openpyxl import load_workbook
-from openpyxl.styles import Alignment
+from openpyxl.styles import Alignment, PatternFill
 from openpyxl.utils.dataframe import dataframe_to_rows
 import smtplib
 from email.message import EmailMessage
@@ -47,13 +47,13 @@ def generate_reports(df, template_path, output_dir, growers=None):
     
     STYLE_MAP = {
     "A": {"number_format": None,          "alignment": "center", "fill": None},
-    "B": {"number_format": "d/mm/yyyy",   "alignment": "right",  "fill": None},
+    "B": {"number_format": "dd/mm/yyyy",   "alignment": "right",  "fill": None},
     "C": {"number_format": "0",           "alignment": "center", "fill": None},
     "D": {"number_format": None,          "alignment": "left",   "fill": None},
     "E": {"number_format": None,          "alignment": "left",   "fill": None},
     "F": {"number_format": None,          "alignment": "left",   "fill": None},
     "G": {"number_format": None,          "alignment": "left",   "fill": None},
-    "H": {"number_format": "d/mm/yyyy",  "alignment": "right",  "fill": None},
+    "H": {"number_format": "dd/mm/yyyy",  "alignment": "right",  "fill": None},
     "I": {"number_format": None,          "alignment": "left",   "fill": None},
     "J": {"number_format": "0",           "alignment": "right",  "fill": None},
     "K": {"number_format": "0.00",        "alignment": "right",  "fill": None},
@@ -95,15 +95,17 @@ def generate_reports(df, template_path, output_dir, growers=None):
     ws = wb.worksheets[SHEET_INDEX]
     ws.delete_rows(START_ROW, PLACEHOLDERS)
 
-    for r_off, row in enumerate(dataframe_to_rows(group, False, False)):
-            row_idx = START_ROW + r_off
-            for c_off, val in enumerate(row,1):
-                cell = ws.cell(row=row_idx, column=c_off, value=val)
+    for r_off, row in enumerate(dataframe_to_rows(group, False, False), START_ROW):
+        for c_off, val in enumerate(row, 1):
+            cell = ws.cell(row=r_off, column=c_off, value=val)
             col = cell.column_letter
             nf = STYLE_MAP[col]["number_format"]
-            if nf: 
+            if nf:
                 cell.number_format = nf
-            cell.alignment = alignments[col]
+            cell.alignment - alignments[col]
+            if STYLE_MAP[col]["fill"]:
+                cell.fill = PatternFill(fill_type="solid", fgColor=STYLE_MAP[col]["fill"])
+
 
     out_path = os.path.join(output_dir, f"{grower} - TBC Grower Reports.xlsx")
     wb.save(out_path)
