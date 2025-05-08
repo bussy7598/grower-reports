@@ -47,13 +47,13 @@ def generate_reports(df, template_path, output_dir, growers=None):
     
     STYLE_MAP = {
     "A": {"number_format": None,          "alignment": "center", "fill": None},
-    "B": {"number_format": "DD/MM/YYYY",  "alignment": "right",  "fill": None},
+    "B": {"number_format": "d/mm/yyyy",   "alignment": "right",  "fill": None},
     "C": {"number_format": "0",           "alignment": "center", "fill": None},
     "D": {"number_format": None,          "alignment": "left",   "fill": None},
     "E": {"number_format": None,          "alignment": "left",   "fill": None},
     "F": {"number_format": None,          "alignment": "left",   "fill": None},
     "G": {"number_format": None,          "alignment": "left",   "fill": None},
-    "H": {"number_format": "DD/MM/YYYY",  "alignment": "right",  "fill": None},
+    "H": {"number_format": "d/mm/yyyy",  "alignment": "right",  "fill": None},
     "I": {"number_format": None,          "alignment": "left",   "fill": None},
     "J": {"number_format": "0",           "alignment": "right",  "fill": None},
     "K": {"number_format": "0.00",        "alignment": "right",  "fill": None},
