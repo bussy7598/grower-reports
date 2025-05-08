@@ -39,29 +39,6 @@ with st.spinner("Loading file..."):
         .str.strip()
     )
 
-st.write("### Master Data Diagnostics")
-st.write("Sample Rows:", df_master.head(5))
-st.write("Column types:", df_master.dtypes)
-
-if df_master['Packed Date'].notna().any():
-    st.write(
-        "Date Range in master:",
-        df_master['Packed Date'].min().date(),
-        "to",
-        df_master['Packed Date'].max().date()
-    )
-else:
-    st.write("Packed Date Column is all NaT!")
-
-counts = (
-    df_master['GrowerName']
-    .value_counts()
-    .rename_axis('Grower')
-    .reset_index(name='TotalRows')
-)
-st.write("Rows per grower (unfiltered):")
-st.dataframe(counts, use_container_width=True)
-
 today = datetime.date.today()
 start_30 = today - datetime.timedelta(days=30)
 filtered_all = df_master[
