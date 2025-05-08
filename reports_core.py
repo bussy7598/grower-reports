@@ -94,12 +94,13 @@ def generate_reports(df, template_path, output_dir, growers=None):
     ws.delete_rows(START_ROW, PLACEHOLDERS)
 
     for r_off, row in enumerate(dataframe_to_rows(group, False, False)):
-        row_idx = START_ROW + r_off
-        for c_off, val in enumerate(row,1):
-            cell = ws.cell(row=row_idx, column=c_off, value=val)
+            row_idx = START_ROW + r_off
+            for c_off, val in enumerate(row,1):
+                cell = ws.cell(row=row_idx, column=c_off, value=val)
             col = cell.column_letter
             nf = STYLE_MAP[col]["number_format"]
-            if nf: cell.number_format = nf
+            if nf: 
+                cell.number_format = nf
             cell.alignment = alignments[col]
 
     out_path = os.path.join(output_dir, f"{grower} - TBC Grower Reports.xlsx")
