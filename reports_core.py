@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment, PatternFill
 from openpyxl.utils.dataframe import dataframe_to_rows
+from openpyxl.utils import get_column_letter
 import smtplib
 from email.message import EmailMessage
 
@@ -25,6 +26,16 @@ def filter_master(path, start_date, end_date):
         .str.strip()
     )
     return df
+
+def autosize_columns(ws, min_width=10, max_width=50):
+    for col_cells in ws.columns:
+        col_letter = get_column_letter(col_cells[0].column)
+        max_len = max(
+            len(str(cell.value)) if cell.value is not None else 0
+            for cell in col_cells
+        )
+        adjusted_width = min(max(max_len + 2, min_width), max_width)
+        ws.column_dimensions[col_letter].width = adjusted_width
 
 def generate_reports(df, template_path, output_dir, growers=None):
     if df is None or df.empty:
@@ -106,6 +117,7 @@ def generate_reports(df, template_path, output_dir, growers=None):
             if STYLE_MAP[col]["fill"]:
                 cell.fill = PatternFill(fill_type="solid", fgColor=STYLE_MAP[col]["fill"])
 
+    autosize_columns(ws)
 
     out_path = os.path.join(output_dir, f"{grower} - TBC Grower Reports.xlsx")
     wb.save(out_path)
