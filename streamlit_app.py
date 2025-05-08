@@ -49,10 +49,6 @@ st.write("### Global 30-day filter test")
 st.write(f"Rows before filter: {len(df_master)}")
 st.write(f"Rows after filter: {len(filtered_all)}")
 
-marv= df_master[df_master["GrowerName"] == "Marvelus Berries"]
-st.write("Marvelus Berries rows (unfiltered):")
-st.dataframe(marv[["Packed Date"]].sort_values("Packed Date"),use_container_width=True)
-
 #3 Loading grower settings
 settings_df = pd.read_excel("grower_settings.xlsx", sheet_name="Filters")
 st.markdown("### Grower-specific Filter Settings")
