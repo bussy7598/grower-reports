@@ -1,7 +1,7 @@
 import os
 import io
 import zipfile
-
+import datetime
 import streamlit as st
 import  pandas as pd
 
@@ -76,21 +76,25 @@ if st.button("Generate Reports"):
     os.makedirs(out_dir,exist_ok=True)
 
     report_path = []
-    today = pd.Timestamp("today").normalize().date()
+    today = datetime.date.today
 
     for _, row in settings_df.iterrows():
         grower = row["GrowerName"]
 
         if row["FilterType"] == "Past month":
-            start = today - pd.DateOffset(months=1)
+            start = today - datetime.timedelta(days=30)
             end = today
         else:
             start = pd.to_datetime(row["CustomStart"]).date()
             end = today
 
+        start_ts = pd.Timestamp(start)
+        end_ts = pd.Timestamp(end) + pd.Timedelta(days=1)
+
         subset = df_master[
             (df_master["GrowerName"] == grower) &
-            (df_master["Packed Date"].dt.date.between(start, end))
+            (df_master["Packed Date"] >= start_ts) &
+            (df_master["Packed Date"] < end_ts)
         ]
 
         paths = generate_reports(
