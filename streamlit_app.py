@@ -34,7 +34,7 @@ with st.spinner("Loading and filtering file..."):
         f.write(master_file.read())
     df_master = filter_master(tmp_master, start_date, end_date)
 
-all_growers = sorted(df_master['Grower Name'].unique())
+all_growers = sorted(df_master['GrowerName'].unique())
 selected = st.multiselect(
     "Select growers to generate a report for",
     options=all_growers,
