@@ -95,10 +95,9 @@ if st.button("Generate Reports"):
 
         if row["FilterType"] == "Past month":
             start = today - datetime.timedelta(days=30)
-            end = today
         else:
             start = pd.to_datetime(row["CustomStart"]).date()
-            end = today
+        end = today
 
         start_ts = pd.Timestamp(start)
         end_ts = pd.Timestamp(end) + pd.Timedelta(days=1)
