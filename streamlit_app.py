@@ -28,9 +28,10 @@ with st.spinner("Loading file..."):
     df_master['Packed Date'] = pd.to_datetime(df_master['Packed Date'], dayfirst=True)
     df_master['GrowerName'] = (
         df_master['Supplier'].astype(str)
-        .str.split("(", 1).str[0].str.strip()
+        .str.split("(", n=1)
+        .str[0]
+        .str.strip()
     )
-
 #3 Loading grower settings
 settings_df = pd.read_excel("grower_settings.xlsx", sheet_name="Filters")
 st.markdown("### Grower-specific Filter Settings")
@@ -67,7 +68,7 @@ if st.button("Generate Reports"):
             growers=[grower]
         )
         report_path.extend(paths)
-        
+
     #bundle into ZIP
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w") as zf:
