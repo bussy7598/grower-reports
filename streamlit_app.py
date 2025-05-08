@@ -25,13 +25,41 @@ with st.spinner("Loading file..."):
     with open(tmp_master, "wb") as f:
         f.write(master_file.read())
     df_master = pd.read_excel(tmp_master, header=1).dropna(how="all")
-    df_master['Packed Date'] = pd.to_datetime(df_master['Packed Date'], dayfirst=True)
+    df_master['Packed Date'] = pd.to_datetime(
+        df_master['Packed Date'],
+         dayfirst=True,
+         errors='coerce'
+    )
     df_master['GrowerName'] = (
         df_master['Supplier'].astype(str)
         .str.split("(", n=1)
         .str[0]
         .str.strip()
     )
+
+st.write("### Master Data Diagnostics")
+st.write("Sample Rows:", df_master.head(5))
+st.write("Column types:", df_master.dtypes)
+
+if df_master['Packed Date'].notna().any():
+    st.write(
+        "Date Range in master:",
+        df_master['Packed Date'].min().date(),
+        "to",
+        df_master['Packed Date'].max().date()
+    )
+else:
+    st.write("Packed Date Column is all NaT!")
+
+counts = (
+    df_master['GrowerName']
+    .value_counts()
+    .rename_axis('Grower')
+    .reset_index(name='TotalRows')
+)
+st.write("Rows per grower (unfiltered):")
+st.dataframe(counts, use_container_width=True)
+
 #3 Loading grower settings
 settings_df = pd.read_excel("grower_settings.xlsx", sheet_name="Filters")
 st.markdown("### Grower-specific Filter Settings")
