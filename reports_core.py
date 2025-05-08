@@ -82,7 +82,7 @@ def generate_reports(df, template_path, output_dir, growers=None):
               for col, spec in STYLE_MAP.items()}
 
     SHEET_INDEX = 0
-    START_ROW = 18
+    START_ROW = 2
     PLACEHOLDERS = 2
 
     for grower, group in df.groupby('GrowerName'):
