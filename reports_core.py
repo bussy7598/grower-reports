@@ -102,7 +102,7 @@ def generate_reports(df, template_path, output_dir, growers=None):
             nf = STYLE_MAP[col]["number_format"]
             if nf:
                 cell.number_format = nf
-            cell.alignment - alignments[col]
+            cell.alignment = alignments[col]
             if STYLE_MAP[col]["fill"]:
                 cell.fill = PatternFill(fill_type="solid", fgColor=STYLE_MAP[col]["fill"])
 
