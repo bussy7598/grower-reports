@@ -92,14 +92,14 @@ if st.button("Generate Reports"):
     #bundle into ZIP
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w") as zf:
-        for p in paths:
+        for p in report_path:
             zf.write(p, os.path.basename(p))
     zip_buffer.seek(0)
 
     import datetime
     date_str = datetime.date.today().strftime("%Y.%m.%d")
 
-    st.success(f"Generated {len(paths)} report(s).")
+    st.success(f"Generated {len(report_path)} report(s).")
     st.download_button(
         "Download All Reports",
         zip_buffer,
