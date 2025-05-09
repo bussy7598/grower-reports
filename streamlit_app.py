@@ -5,6 +5,7 @@ import datetime
 
 import streamlit as st
 import  pandas as pd
+import requests
 
 
 from reports_core import filter_master, generate_reports
@@ -71,6 +72,8 @@ if st.button("Generate Reports"):
             (df_master["Packed Date"] < end_ts)
         ]
 
+        subset = subset[ subset["Trays"].fillna(0) !=0]
+
         paths = generate_reports(
             subset,
             template_path="TBC_Grower_Report_Template.xlsx",
@@ -78,6 +81,27 @@ if st.button("Generate Reports"):
             growers=[grower]
         )
         report_path.extend(paths)
+
+        #4 Parse email recipients
+        raw_emails = row["Emails"]
+        to_email_list = [e.strip() for e in raw_emails.split(",") if e.strip()]
+
+        webhook = st.secrets["make_webhook_url"]
+        for p in paths:
+            with open(p, "rb") as f:
+                files = {
+                    "Report File":(
+                        os.path.basename(p),
+                        f,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+                }
+                data = {
+                    "grower": grower,
+                    "emails": ",".join(to_email_list),
+                }
+
+                requests.post(webhook, data=data, files=files)
 
     #bundle into ZIP
     zip_buffer = io.BytesIO()
