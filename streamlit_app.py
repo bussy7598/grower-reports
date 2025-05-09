@@ -98,8 +98,8 @@ if st.button("Generate Reports"):
                 }
 
                 st.write("JSON Payload:", {"grower": grower, "emails:": to_email_list})
-                st.json({"grower": grower, "emails":{to_email_list}})
-                
+                st.json({"grower": grower, "emails":to_email_list})
+
                 requests.post(
                     webhook,
                     json={
