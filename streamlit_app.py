@@ -88,37 +88,30 @@ if st.button("Generate Reports"):
         webhook = st.secrets["make_webhook_url"]
 
         for p in paths:
-            json_payload = {
-                "grower": grower,
-                "emails": to_email_list
-            }
+            with open(p, "rb") as f:
+                files = {
+                    "Report File": (
+                        os.path.basename(p),
+                        f,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+                }
 
-            files = {
-                "Report File": (
-                    os.path.basename(p),
-                    open(p, "rb"),
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
-            }
+                # Flattened form-data payload
+                form_data = {"grower": grower}
+                for idx, email in enumerate(to_email_list):
+                    form_data[f"emails[{idx}]"] = email
 
-            form_data = {
-                "data": json.dumps(json_payload)
-            }
+                if debug:
+                    st.code(f"Sending to webhook: {webhook}")
+                    st.json(form_data)
+                    st.text(f"File: {os.path.basename(p)}")
 
-            # Debug output
-            if debug:
-                st.code(f"Sending to webhook: {webhook}")
-                st.json(json_payload)
-                st.text(f"File: {os.path.basename(p)}")
-
-            # Send request
-            try:
-                response = requests.post(webhook, data=form_data, files=files)
-                response.raise_for_status()
-            except Exception as e:
-                st.error(f"❌ Failed to send report for {grower}: {e}")
-            finally:
-                files["Report File"][1].close()
+                try:
+                    response = requests.post(webhook, data=form_data, files=files)
+                    response.raise_for_status()
+                except Exception as e:
+                    st.error(f"❌ Failed to send report for {grower}: {e}")
 
     # Bundle into ZIP
     zip_buffer = io.BytesIO()
