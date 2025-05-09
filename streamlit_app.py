@@ -2,7 +2,7 @@ import os
 import io
 import zipfile
 import datetime
-
+import json
 import streamlit as st
 import  pandas as pd
 import requests
@@ -96,12 +96,14 @@ if st.button("Generate Reports"):
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     )
                 }
-                data = {
-                    "grower": grower,
-                    "emails": ",".join(to_email_list),
-                }
-
-                requests.post(webhook, data=data, files=files)
+                requests.post(
+                    webhook,
+                    json={
+                        "grower": grower,
+                        "emails": to_email_list
+                    },
+                    files=files
+                )
 
     #bundle into ZIP
     zip_buffer = io.BytesIO()
