@@ -88,26 +88,18 @@ if st.button("Generate Reports"):
 
         webhook = st.secrets["make_webhook_url"]
         for p in paths:
+            payload = {"grower": grower, "emails": to_email_list}
+            requests.post(webhook, json=payload)
+
             with open(p, "rb") as f:
                 files = {
-                    "Report File":(
+                    "Report File": (
                         os.path.basename(p),
                         f,
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     )
                 }
-
-                st.write("JSON Payload:", {"grower": grower, "emails:": to_email_list})
-                st.json({"grower": grower, "emails":to_email_list})
-
-                requests.post(
-                    webhook,
-                    json={
-                        "grower": grower,
-                        "emails": to_email_list
-                    },
-                    files=files
-                )
+                requests.post(webhook, files=files)
 
     #bundle into ZIP
     zip_buffer = io.BytesIO()
