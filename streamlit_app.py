@@ -107,6 +107,10 @@ if st.button("Generate Reports"):
                     st.json(form_data)
                     st.text(f"File: {os.path.basename(p)}")
 
+                if debug:
+                    st.write("Emails to be sent:")
+                    st.write(to_email_list)
+
                 try:
                     response = requests.post(webhook, data=form_data, files=files)
                     response.raise_for_status()
