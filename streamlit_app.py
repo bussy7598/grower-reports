@@ -98,9 +98,10 @@ if st.button("Generate Reports"):
                 }
 
                 # Flattened form-data payload
-                form_data = {"grower": grower}
-                for idx, email in enumerate(to_email_list):
-                    form_data[f"emails[{idx}]"] = email
+                form_data = {
+                    "grower": grower,
+                    "emails": ", ".join(to_email_list)
+                }
 
                 if debug:
                     st.code(f"Sending to webhook: {webhook}")
