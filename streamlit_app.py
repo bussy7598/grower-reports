@@ -2,12 +2,8 @@ import os
 import io
 import zipfile
 import datetime
-import json
 import streamlit as st
 import pandas as pd
-import requests
-import re
-
 from reports_core import filter_master, generate_reports
 
 st.set_page_config(page_title="Grower Reports", layout="wide")
@@ -41,17 +37,13 @@ settings_df = pd.read_excel("grower_settings.xlsx", sheet_name="Filters")
 st.markdown("### Grower-specific Filter Settings")
 st.dataframe(settings_df, use_container_width=True)
 
-# Debug toggle
-debug = st.checkbox("🔍 Show debug information")
-
-# 4. Generate Reports & Send
+# 4. Generate Reports Only
 if st.button("Generate Reports"):
     out_dir = "temp_reports"
     os.makedirs(out_dir, exist_ok=True)
 
     report_paths = []
     today = datetime.date.today()
-    webhook = st.secrets["make_webhook_url"]
 
     for _, row in settings_df.iterrows():
         grower = row["GrowerName"]
@@ -83,43 +75,6 @@ if st.button("Generate Reports"):
         )
         report_paths.extend(paths)
 
-        # Parse email recipients
-        raw_emails = row["Emails"]
-        to_email_list = [
-            e.strip() for e in raw_emails.split(",")
-            if re.match(r"^[\w\.-]+@[\w\.-]+\.\w+$", e.strip())
-        ]
-
-        for path in paths:
-            with open(path, "rb") as f:
-                files = {
-                    "Report File": (
-                        os.path.basename(path),
-                        f,
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    )
-                }
-
-                # Payload: grower and comma-separated emails
-                form_data = {
-                    "grower": grower,
-                    "emails": ", ".join(to_email_list)
-                }
-
-                if debug:
-                    st.markdown(f"#### Sending to webhook: {webhook}")
-                    st.json(form_data)
-                    st.text(f"Attached File: {os.path.basename(path)}")
-                    st.write("📧 Email Recipients:")
-                    st.write(to_email_list)
-
-                try:
-                    response = requests.post(webhook, data=form_data, files=files)
-                    response.raise_for_status()
-                    st.success(f"✅ Sent report for **{grower}**")
-                except Exception as e:
-                    st.error(f"❌ Failed to send report for **{grower}**: {e}")
-
     # Bundle all generated reports into a ZIP file
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w") as zf:
@@ -129,7 +84,7 @@ if st.button("Generate Reports"):
 
     # Download button
     date_str = today.strftime("%Y.%m.%d")
-    st.success(f"✅ Generated and sent {len(report_paths)} report(s).")
+    st.success(f"✅ Generated {len(report_paths)} report(s).")
     st.download_button(
         "📦 Download All Reports",
         zip_buffer,
