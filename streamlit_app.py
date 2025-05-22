@@ -66,6 +66,10 @@ if st.button("Generate Reports"):
         ]
         subset = subset[subset["Trays"].fillna(0) != 0]
 
+        if subset["Packed Date"].max() < (pd.Timestamp(today) - pd.Timedelta(days=30)):
+            st.info(f"Skipping {grower} - last packed on {subset['Packed Date'].max().strftime('%d/%m/%Y')}")
+            continue
+
         # Generate reports
         paths = generate_reports(
             subset,

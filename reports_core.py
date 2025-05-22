@@ -99,11 +99,6 @@ def generate_reports(df, template_path, output_dir, growers=None):
     for grower, group in df.groupby('GrowerName'):
          if growers and grower not in growers:
             continue
-         
-         last_packed = group["Packed Date"].max()
-         if (datetime.today() - last_packed).days >30:
-             print(f"Skipping {grower}, last packed on {last_packed.strftime('%d/%m/%Y')}")
-             continue
 
     group = group.reindex(columns=expected_cols, fill_value="")
 
