@@ -71,7 +71,7 @@ if st.button("Generate Reports"):
             st.info(f"Skipping {grower} - last packed on {subset['Packed Date'].max().strftime('%d/%m/%Y')}")
             continue
 
-        mix_type = row.get("Mixtype", "Mixed").strip().lower()
+        mix_type = row.get("MixType", "Mixed").strip().lower()
 
         # Generate reports
         paths = generate_reports(
