@@ -105,15 +105,11 @@ def generate_reports(df, template_path, output_dir, growers=None, split_by_crop=
         ws = wb.worksheets[SHEET_INDEX]
 
         if split_by_crop:
-            wb_template = load_workbook(template_path)
-            ws_template = wb_template.worksheets[SHEET_INDEX]  # remove default sheet
-
-
             for crop, crop_group in group.groupby("Crop"):
                 crop_group = crop_group.reindex(columns=expected_cols, fill_value="")
                 crop_group = crop_group.sort_values("Packed Date")
 
-                ws_crop = wb.copy_worksheet(ws_template)
+                ws_crop = wb.copy_worksheet(ws)
                 ws_crop.title = str(crop)[:31]
 
                 ws_crop.delete_rows(START_ROW, PLACEHOLDERS)
@@ -130,6 +126,7 @@ def generate_reports(df, template_path, output_dir, growers=None, split_by_crop=
                             cell.fill = PatternFill(fill_type="solid", fgColor=STYLE_MAP[col]["fill"])
 
                 autosize_columns(ws_crop)
+            wb.remove(ws)
 
         else:
             ws.delete_rows(START_ROW, PLACEHOLDERS)
