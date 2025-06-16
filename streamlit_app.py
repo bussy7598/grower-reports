@@ -76,7 +76,7 @@ if st.button("Generate Reports"):
             subset,
             template_path="TBC_Grower_Report_Template.xlsx",
             output_dir=out_dir,
-            growers=[grower]
+            growers=[grower],
             split_by_crop=(mix_type == "unmixed")
         )
         report_paths.extend(paths)
