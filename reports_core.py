@@ -107,6 +107,10 @@ def generate_reports(df, template_path, output_dir, growers=None, split_by_crop=
         if split_by_crop:
             wb.remove(ws)  # remove default sheet
 
+            template_wb = load_workbook(template_path)
+            template_ws = template_wb.worksheets[SHEET_INDEX]
+            header_values = [cell.value for cell in template_ws[1]]
+
             for crop, crop_group in group.groupby("Crop"):
                 crop_group = crop_group.reindex(columns=expected_cols, fill_value="")
                 crop_group = crop_group.sort_values("Packed Date")
