@@ -37,7 +37,7 @@ def autosize_columns(ws, min_width=10, max_width=50):
         adjusted_width = min(max(max_len + 2, min_width), max_width)
         ws.column_dimensions[col_letter].width = adjusted_width
 
-def generate_reports(df, template_path, output_dir, growers=None):
+def generate_reports(df, template_path, output_dir, growers=None, split_by_crop=False):
     if df is None or df.empty:
         return []
   
@@ -101,23 +101,44 @@ def generate_reports(df, template_path, output_dir, growers=None):
             continue
 
     group = group.reindex(columns=expected_cols, fill_value="")
+    group = group.sort_values("Packed Date")
 
     wb= load_workbook(template_path)
     ws = wb.worksheets[SHEET_INDEX]
-    ws.delete_rows(START_ROW, PLACEHOLDERS)
 
-    for r_off, row in enumerate(dataframe_to_rows(group, False, False), START_ROW):
-        for c_off, val in enumerate(row, 1):
-            cell = ws.cell(row=r_off, column=c_off, value=val)
-            col = cell.column_letter
-            nf = STYLE_MAP[col]["number_format"]
-            if nf:
-                cell.number_format = nf
-            cell.alignment = alignments[col]
-            if STYLE_MAP[col]["fill"]:
-                cell.fill = PatternFill(fill_type="solid", fgColor=STYLE_MAP[col]["fill"])
+    if split_by_crop:
+        wb.remove(ws)
 
-    autosize_columns(ws)
+        for crop, crop_group in group.groupby("Crop"):
+            crop_group = crop_group.sort_values("Packed Date")
+            crop_group = crop_group.reindex(columns=expected_cols, fill_value="")
+
+            ws_crop = wb.create_sheet(title=str(crop)[:31])
+
+            for r_off, row in enumerate(dataframe_to_rows(group, False, False), START_ROW):
+                for c_off, val in enumerate(row, 1):
+                    cell = ws.cell(row=r_off, column=c_off, value=val)
+                    col = cell.column_letter
+                    nf = STYLE_MAP[col]["number_format"]
+                    if nf:
+                        cell.number_format = nf
+                    cell.alignment = alignments[col]
+                    if STYLE_MAP[col]["fill"]:
+                        cell.fill = PatternFill(fill_type="solid", fgColor=STYLE_MAP[col]["fill"])
+
+            autosize_columns(ws)
+
+    else:
+        ws.delete_rows(START_ROW, PLACEHOLDERS)
+        for r_off, row in enumerate(dataframe_to_rows(group, False, False), START_ROW):
+            for c_off, val in enumerate(row, 1):
+                cell = ws.cell(row=r_off, column=c_off, value=val)
+                col = cell.column_letter
+                nf = STYLE_MAP.get(col, {}).get("number_format")
+                if nf:
+                    cell.number_format = nf
+                cell.alignment = alignments.get(col)
+        autosize_columns(ws)
 
     out_path = os.path.join(output_dir, f"{grower} - TBC Grower Reports.xlsx")
     wb.save(out_path)

@@ -34,6 +34,7 @@ with st.spinner("Loading file..."):
 
 # 3. Load grower settings
 settings_df = pd.read_excel("grower_settings.xlsx", sheet_name="Filters")
+settings_df["MixType"] = settings_df["MixType"].fillna("Mixed")
 st.markdown("### Grower-specific Filter Settings")
 st.dataframe(settings_df, use_container_width=True)
 
@@ -76,6 +77,7 @@ if st.button("Generate Reports"):
             template_path="TBC_Grower_Report_Template.xlsx",
             output_dir=out_dir,
             growers=[grower]
+            split_by_crop=(mix_type == "unmixed")
         )
         report_paths.extend(paths)
 
