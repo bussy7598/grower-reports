@@ -113,7 +113,7 @@ def generate_reports(df, template_path, output_dir, growers=None, split_by_crop=
 
                 ws_crop = wb.create_sheet(title=str(crop)[:31])
 
-                for r_off, row in enumerate(dataframe_to_rows(crop_group, False, False), START_ROW):
+                for r_off, row in enumerate(dataframe_to_rows(crop_group, index=False, header=True), START_ROW):
                     for c_off, val in enumerate(row, 1):
                         cell = ws_crop.cell(row=r_off, column=c_off, value=val)
                         col = cell.column_letter
