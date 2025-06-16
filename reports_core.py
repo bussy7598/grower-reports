@@ -91,7 +91,7 @@ def generate_reports(df, template_path, output_dir, growers=None, split_by_crop=
     alignments = {col: Alignment(horizontal=spec["alignment"]) for col, spec in STYLE_MAP.items()}
 
     SHEET_INDEX = 0
-    START_ROW = 3
+    START_ROW = 2
     PLACEHOLDERS = 2
 
     for grower, group in df.groupby("GrowerName"):
